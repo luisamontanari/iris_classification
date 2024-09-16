@@ -19,34 +19,31 @@ trainset, testset = get_train_test_split(i, k, shuffled_data)
 
 ##--------------- decision tree model building ----------------------
 
-def build_decision_tree(trainset, g_i=1, node=None, isUnderThreshold=False, variety=None) :
-
-    # TODO: add Rekursionanker with a sensible condition (if GI is low or the number of people is low or the tree is too big  etc)
-    if g_i < 0.3 :
-        # TODO I don't think we actually need to remember the variety, we can just take the variety with the most data point in the result
-        # maybe we don't need the direction either?  Think this thorugh
-        if isUnderThreshold : node.left = decision_tree(leaf(variety))
-        else : node.right = decision_tree(leaf(variety))
-        return node
-
-    g_i, threshold, isUnderThreshold, feature, variety = get_purest_node(trainset, verbose=True)
-
-    node = decision_tree(tree_node(threshold, feature))
-
-    # recursively calc purest node on both child segmentions: 
-    trainset_left = trainset[trainset[feature] < threshold]
-    trainset_right = trainset[trainset[feature] >= threshold]
-
-    build_decision_tree(trainset_left, g_i, node, isUnderThreshold, variety)
-    build_decision_tree(trainset_right, g_i, node, isUnderThreshold, variety)
-
-    return node
-
    # trainset = trainset[trainset['variety'] != variety]
-
-root = build_decision_tree(trainset)
+#trainset_left = trainset[trainset['lala'] < 5]
+root = build_decision_tree(trainset, verbose=False)
 
 # TODO add function to traverse tree for data point classification
 # TODO evaluate model accuracy against testset
+
+#print(root.traverse(testset.iloc[0]))
+#print(testset.iloc[0])
+
+#print(testset.iloc[0].variety)
+
+#print(testset.iloc[0]['sepal.length'])
+
+print(root.show_tree())
+#print('----------------')
+#print(root.left.show_tree())
+#print('------------------')
+#print(root.right.show_tree())
+
+#    tree_node 
+#L:Set  --   tree_node
+#        tree_node --- L:Virg
+#    L:Vers -- ERROR
+    
+
 
 
