@@ -21,7 +21,7 @@ trainset, testset = get_train_test_split(i, k, shuffled_data)
 
    # trainset = trainset[trainset['variety'] != variety]
 #trainset_left = trainset[trainset['lala'] < 5]
-root = build_decision_tree(trainset, verbose=False)
+root = build_decision_tree(trainset, verbose=True)
 
 # TODO add function to traverse tree for data point classification
 # TODO evaluate model accuracy against testset
