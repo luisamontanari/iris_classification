@@ -7,16 +7,16 @@ class decision_tree:
         self.right = None
         self.data = data
     
-    def traverse(self, datapoint):
+    def classify(self, datapoint):
         #traverse tree until we get to a leaf, then output classification label
         if isinstance(self.data, leaf) :
             return self.data.label
         
         node = self.data
         if datapoint[node.feature] < node.threshold :
-            return self.left.traverse(datapoint)
+            return self.left.classify(datapoint)
         
-        return self.right.traverse(datapoint)
+        return self.right.classify(datapoint)
     
     # TODO: fix show task, currently only breadth-first traversal
     def show_tree(self) :
@@ -109,27 +109,42 @@ def get_purest_node(df, verbose=False) :
     if (verbose) : print('-----------------------------------')
     return min_gini_total, purest_threshold, feat, direction
 
-def build_decision_tree(trainset, g_i=1, isUnderThreshold=False, variety=None, verbose=False) :
-    #TODO: add speciaal case: if only one feature exists, return leaf node immediately
+# if df contains only one variety, return that. Otherwise, return None
+def get_variety_if_all_eq(df):
+    df_unique = df['variety'].unique()
+    if len(df_unique) == 1: 
+        return df_unique['variety'].iloc[0]
+    return None
 
-    g_i, threshold, feature, dir = get_purest_node(trainset, verbose=verbose)
+def build_decision_tree(trainset, g_i=1, variety=None, verbose=False) :
+    
+    #special case: if only one feature exists, return leaf node immediately
+    unique_variety = get_variety_if_all_eq(trainset)
+    if unique_variety :  
+        node = decision_tree(leaf(unique_variety))
+        return node
+
+    # determine purest threshold and g_i value for each variety when separated by that threshold
+    g_i, threshold, feature, most_entries_under_threshold = get_purest_node(trainset, verbose=verbose)
 
     node = decision_tree(tree_node(threshold, feature))
 
-    # recursively calc purest node on both child segmentions: 
+    # split trainset by threshold
     trainset_left = trainset[trainset[feature] < threshold]
     trainset_right = trainset[trainset[feature] >= threshold]
     
+    # for each variety, check if respective g_i is pure enough to create leaf node
     for i in range(3) :
         if g_i[i] < 0.15: # TODO: add Rekursionanker with a sensible condition (if GI is low or the number of people is low or the tree is too big  etc)
-            if dir[i] : 
+            if most_entries_under_threshold[i] : 
                 variety = trainset_left['variety'].value_counts().idxmax()
                 node.left = decision_tree(leaf(variety))
             else : 
                 variety = trainset_right['variety'].value_counts().idxmax()
                 node.right = decision_tree(leaf(variety))
+    # if left/right node is not a leaf, recurse -> it will then automatically become a decision node
     if (not node.right):
-        node.right = build_decision_tree(trainset_right, g_i, isUnderThreshold, variety, verbose=verbose)
+        node.right = build_decision_tree(trainset_right, g_i, variety, verbose=verbose)
     if (not node.left) :
-        node.left = build_decision_tree(trainset_left, g_i, isUnderThreshold, variety, verbose=verbose)
+        node.left = build_decision_tree(trainset_left, g_i, variety, verbose=verbose)
     return node
