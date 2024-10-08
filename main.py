@@ -5,6 +5,9 @@ import matplotlib as plt
 
 from preprocessing import *
 from decision_tree import *
+from evaluate import *
+
+pd.options.mode.chained_assignment = None # disable SettingWithCopyWarning
 
 iris_data = iris_data = pd.read_csv('./input/iris.csv')
 
@@ -19,30 +22,14 @@ trainset, testset = get_train_test_split(i, k, shuffled_data)
 
 ##--------------- decision tree model building ----------------------
 
-   # trainset = trainset[trainset['variety'] != variety]
-#trainset_left = trainset[trainset['lala'] < 5]
 root = build_decision_tree(trainset, verbose=False)
 
-# TODO evaluate model accuracy against testset
+print(f'Prediction for dataset head:\n{root.classify_dataset(testset.head())}')
 
-print(testset.iloc[0])
-print(f'Prediction for datapoint: {root.classify(testset.iloc[0])}')
-
-#print(testset.iloc[0].variety)
-
-#print(testset.iloc[0]['sepal.length'])
+print(f'Accuracy: {evaluate(root, testset)}')
 
 print(root.show_tree())
-#print('----------------')
-#print(root.left.show_tree())
-#print('------------------')
-#print(root.right.show_tree())
 
-#    tree_node 
-#L:Set  --   tree_node
-#        tree_node --- L:Virg
-#    L:Vers -- ERROR
-    
 
 
 

@@ -1,22 +1,30 @@
 import pandas as pd
 import math
 
+# TODO: implement ml_model parent class
 class decision_tree:
     def __init__(self, data):
         self.left = None
         self.right = None
         self.data = data
     
-    def classify(self, datapoint):
+    # classify a single datapoint
+    def classify_datapoint(self, datapoint):
         #traverse tree until we get to a leaf, then output classification label
         if isinstance(self.data, leaf) :
             return self.data.label
         
         node = self.data
         if datapoint[node.feature] < node.threshold :
-            return self.left.classify(datapoint)
+            return self.left.classify_datapoint(datapoint)
         
-        return self.right.classify(datapoint)
+        return self.right.classify_datapoint(datapoint)
+    
+    # TODO: rethink if we actually want to add the classification to the original dataframe or instead return a separate object
+    # classify a set of datapoints
+    def classify_dataset(self, df) :
+        df.loc[:, 'classification'] = df.apply(self.classify_datapoint, axis=1, result_type='expand')
+        return df
     
     # TODO: fix show task, currently only breadth-first traversal
     def show_tree(self) :
