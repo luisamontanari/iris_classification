@@ -20,6 +20,8 @@ shuffled_data = iris_data.sample(frac=1) # shuffle data
 trainset, testset = get_train_test_split(i, k, shuffled_data)
 #----------------------------------------------------------
 
+# TODO: add timer for execution
+
 ##--------------- decision tree model building ----------------------
 
 root = build_decision_tree(trainset, verbose=False)

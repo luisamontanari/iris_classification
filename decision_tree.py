@@ -1,5 +1,6 @@
 import pandas as pd
 import math
+import numpy as np
 
 # TODO: implement ml_model parent class
 class decision_tree:
@@ -51,18 +52,14 @@ class tree_node:
         self.threshold = threshold
         self.feature = feature
 
-
-def calc_gini(df, avg, variety, feature) :
-    # step 2: separate df by threshold
-    left_branch = df[df[feature] < avg]
-    right_branch = df[df[feature] >= avg]
-    
-    #print(left_branch.shape[0], right_branch.shape[0])
-    if left_branch.shape[0] == 0 or right_branch.shape[0] == 0: return 1, True
-
+def calc_gini_vectorized(df, left_branch, right_branch, len) :
     # step 3: separate branches by variety (yes/no)
-    l_vc_yes = left_branch[left_branch['variety'] == variety].shape[0]
-    r_vc_yes = right_branch[right_branch['variety'] == variety].shape[0]
+    l_vc_yes = np.arange(len)
+    r_vc_yes = np.arange(len)
+    
+    for i, variety in enumerate(df['variety'].unique()): ## TODO: vectorize?
+        l_vc_yes[i] = left_branch[left_branch['variety'] == variety].shape[0]
+        r_vc_yes[i] = right_branch[right_branch['variety'] == variety].shape[0]
 
     l_vc_no = left_branch.shape[0] - l_vc_yes
     r_vc_no = right_branch.shape[0] - r_vc_yes
@@ -79,28 +76,36 @@ def calc_gini(df, avg, variety, feature) :
     return total_gini, l_vc_yes > r_vc_yes
 
 def calc_min_gini_impurity(df, feature) : 
-    min_gini = [1,1,1]
+    len = df['variety'].unique().shape[0]
+    min_gini = [1] * len
     threshold = 0
-    direction = False
-    gini= [1,1,1] #todo: this should always correspond to the unique numbrr  of features, make this nicer
-    dir = [True, True, True]
+    direction = [True] * len
+    gini= [1] * len
+    dir = [True] * len
     for i in range(df.shape[0]-1) :
         # step 1: calculate average between pairs in the sorted feature column as potential thresholds
         avg = (df[feature].iloc[i] + df[feature].iloc[i+1])/2
-    
-        for i, variety in enumerate(df['variety'].unique()): ## TODO:vectorize?
-            gini[i], dir[i] = calc_gini(df, avg, variety, feature)
+        
+        # step 2: separate df by threshold
+        left_branch = df[df[feature] < avg]
+        right_branch = df[df[feature] >= avg]
+        
+        if left_branch.shape[0] == 0 or right_branch.shape[0] == 0: 
+            gini = [1] * len
+            dir = [True] * len
+        else:
+            gini, dir = calc_gini_vectorized(df, left_branch, right_branch, len)
 
         if min(gini) < min(min_gini) : 
             min_gini = gini.copy()
             threshold = avg
-            direction =  dir.copy()
+            direction = dir.copy()
             
-    
     return(min_gini, threshold, direction)
 
 def get_purest_node(df, verbose=False) :
-    min_gini_total = [1,1,1]
+    len = df['variety'].unique().shape[0]
+    min_gini_total = [1] * len
     direction = True
     purest_threshold = 0
     feat = ''
@@ -142,7 +147,7 @@ def build_decision_tree(trainset, g_i=1, variety=None, verbose=False) :
     trainset_right = trainset[trainset[feature] >= threshold]
     
     # for each variety, check if respective g_i is pure enough to create leaf node
-    for i in range(3) :
+    for i in range(trainset['variety'].unique().shape[0]) :
         if g_i[i] < 0.15: # TODO: add Rekursionanker with a sensible condition (if GI is low or the number of people is low or the tree is too big  etc)
             if most_entries_under_threshold[i] : 
                 variety = trainset_left['variety'].value_counts().idxmax()
