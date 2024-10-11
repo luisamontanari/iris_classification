@@ -57,7 +57,7 @@ def calc_gini_vectorized(df, left_branch, right_branch, len) :
     l_vc_yes = np.arange(len)
     r_vc_yes = np.arange(len)
     
-    for i, variety in enumerate(df['variety'].unique()): ## TODO: vectorize?
+    for i, variety in enumerate(df['variety'].unique()):
         l_vc_yes[i] = left_branch[left_branch['variety'] == variety].shape[0]
         r_vc_yes[i] = right_branch[right_branch['variety'] == variety].shape[0]
 
@@ -75,7 +75,7 @@ def calc_gini_vectorized(df, left_branch, right_branch, len) :
     total_gini = w_gini_left + w_gini_right
     return total_gini, l_vc_yes > r_vc_yes
 
-def calc_min_gini_impurity(df, feature) : 
+def calc_min_gini_impurity(df, feature) : # TODO: vectorize
     len = df['variety'].unique().shape[0]
     min_gini = [1] * len
     threshold = 0
@@ -106,7 +106,7 @@ def calc_min_gini_impurity(df, feature) :
 def get_purest_node(df, verbose=False) :
     len = df['variety'].unique().shape[0]
     min_gini_total = [1] * len
-    direction = True
+    direction = [True] * len
     purest_threshold = 0
     feat = ''
     for feature in df.columns[:-1]:
@@ -117,7 +117,7 @@ def get_purest_node(df, verbose=False) :
         if min(g_i) < min(min_gini_total) :
             min_gini_total = g_i.copy()
             feat = feature
-            direction = dir
+            direction = dir.copy()
             purest_threshold = threshold
     if (verbose) : print('-----------------------------------')
     return min_gini_total, purest_threshold, feat, direction

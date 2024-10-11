@@ -17,20 +17,27 @@ k=10
 i = 3
 
 shuffled_data = iris_data.sample(frac=1) # shuffle data
-trainset, testset = get_train_test_split(i, k, shuffled_data)
-#----------------------------------------------------------
+accuracy = np.zeros(k)
 
-# TODO: add timer for execution
+for i in range(0, k) : 
+    trainset, testset = get_train_test_split(i, k, shuffled_data)
+    #----------------------------------------------------------
 
-##--------------- decision tree model building ----------------------
+    # TODO: add timer for execution
 
-root = build_decision_tree(trainset, verbose=False)
+    ##--------------- decision tree model building ----------------------
 
-print(f'Prediction for dataset head:\n{root.classify_dataset(testset.head())}')
+    root = build_decision_tree(trainset, verbose=False)
 
-print(f'Accuracy: {evaluate(root, testset)}')
+    #print(f'Prediction for dataset head:\n{root.classify_dataset(testset.head())}')
 
-print(root.show_tree())
+    accuracy[i] = evaluate(root, testset)
+    #print(f'Accuracy for iteration {i}: {accuracy[i]}')
+    
+    #print(root.show_tree())
+
+avg_model_accuracy = np.average(accuracy)
+print(f'Average model accuracy for decision tree: {avg_model_accuracy:.2f}')
 
 
 
