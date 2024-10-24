@@ -1,8 +1,6 @@
 import math
 import pandas as pd
 
-# TODO implement actual k fold cross-validation
-
 def get_train_test_split(i, k, shuffled_data) : 
     step_size = math.floor(shuffled_data.shape[0]/k)
     start_idx = i*step_size

@@ -2,15 +2,21 @@ import pandas as pd
 import math
 import numpy as np
 
+# TODO research classification and regression tree algorithm (CART)
+
 # TODO: implement ml_model parent class
 class decision_tree:
     def __init__(self, data):
         self.left = None
         self.right = None
         self.data = data
+        
+    def __str__(self) : 
+        return self.__show_tree()
     
     # classify a single datapoint
     def classify_datapoint(self, datapoint):
+        # TODO: add exception if child node does not exist
         #traverse tree until we get to a leaf, then output classification label
         if isinstance(self.data, leaf) :
             return self.data.label
@@ -28,19 +34,18 @@ class decision_tree:
         return df
     
     # TODO: fix show task, currently only breadth-first traversal
-    def show_tree(self) :
+    def __show_tree(self) :
         if isinstance(self.data, tree_node) :
-            data = ['TreeNode:', self.data.threshold, self.data.feature]
+            data = f'(TreeNode: {self.data.feature} {self.data.threshold:.3f})'
             if (self.left and self.right) :
-                #print('both children')
-                return f'{data} --- {self.left.show_tree()} --- {self.right.show_tree()}'
+                return f'{data} --- {self.left.__show_tree()} --- {self.right.__show_tree()}'
             if (self.left) :
-                return f'{data}\n{self.left.show_tree()} --- Error on right child'
+                return f'{data}\n{self.left.__show_tree()} --- Error on right child'
             if (self.right) :
-                return f'{data}\n Error on left child --- {self.right.show_tree()}'
+                return f'{data}\n Error on left child --- {self.right.__show_tree()}'
             return 'Error on both children'
         if isinstance(self.data, leaf) :
-            data = ['Leaf: ', self.data.label]
+            data = f'(Leaf: {self.data.label})'
             return data
 
 class leaf:
@@ -53,7 +58,6 @@ class tree_node:
         self.feature = feature
 
 def calc_gini_vectorized(df, left_branch, right_branch, len) :
-    # step 3: separate branches by variety (yes/no)
     l_vc_yes = np.arange(len)
     r_vc_yes = np.arange(len)
     
@@ -82,19 +86,22 @@ def calc_min_gini_impurity(df, feature) : # TODO: vectorize
     direction = [True] * len
     gini= [1] * len
     dir = [True] * len
+    prev_avg = math.nan
     for i in range(df.shape[0]-1) :
         # step 1: calculate average between pairs in the sorted feature column as potential thresholds
         avg = (df[feature].iloc[i] + df[feature].iloc[i+1])/2
+        if avg == prev_avg: 
+            continue
+        prev_avg = avg
         
         # step 2: separate df by threshold
         left_branch = df[df[feature] < avg]
         right_branch = df[df[feature] >= avg]
         
         if left_branch.shape[0] == 0 or right_branch.shape[0] == 0: 
-            gini = [1] * len
-            dir = [True] * len
-        else:
-            gini, dir = calc_gini_vectorized(df, left_branch, right_branch, len)
+            continue
+        
+        gini, dir = calc_gini_vectorized(df, left_branch, right_branch, len)
 
         if min(gini) < min(min_gini) : 
             min_gini = gini.copy()
