@@ -5,6 +5,7 @@ import numpy as np
 # TODO research classification and regression tree algorithm (CART)
 
 # TODO: implement ml_model parent class
+# utilize constructor instead of outside function build_decision_tree / or reference build_decision_tree in constr
 class decision_tree:
     def __init__(self, data):
         self.left = None
@@ -27,7 +28,7 @@ class decision_tree:
         
         return self.right.classify_datapoint(datapoint)
     
-    # TODO: rethink if we actually want to add the classification to the original dataframe or instead return a separate object
+    # TODO: rethink if we actually want to add the classification to the original dataframe or instead return a separate object. Update: No, we do not...
     # classify a set of datapoints
     def classify_dataset(self, df) :
         df.loc[:, 'classification'] = df.apply(self.classify_datapoint, axis=1, result_type='expand')

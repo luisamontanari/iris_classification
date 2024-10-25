@@ -6,15 +6,17 @@ import time
 
 from preprocessing import *
 from decision_tree import *
+from naive_bayes import *
 from evaluate import *
 
 pd.options.mode.chained_assignment = None # disable SettingWithCopyWarning
+np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)}) # format np array prints to 2 decimal places
 
 iris_data = iris_data = pd.read_csv('./input/iris.csv')
 shuffled_data = iris_data.sample(frac=1) # shuffle data
 
 k=10 # param for k-fold-cross-validation, commonly 10
-accuracy = np.zeros(k)
+accuracy = np.zeros((k, 2))
 
 start = time.time() # TODO: function specific timer would be neat
 #-----------------------------------------------------------
@@ -25,18 +27,24 @@ for i in range(k) :
     
     ##--------------- decision tree model building ----------------------
 
-    root = build_decision_tree(trainset, verbose=False)
+    # TODO: fix this
 
-    #print(f'Prediction for dataset head:\n{root.classify_dataset(testset.head())}')
-
-    accuracy[i] = evaluate_model(root, testset)
+    #root = build_decision_tree(trainset, verbose=False)
+    #accuracy[i, 0] = evaluate_model(root, testset)
+    
+    bayes_model = naive_bayes_model(shuffled_data)
+    #print(testset.head())
+    #print(bayes_model.classify_dataset(testset))
+    accuracy[i, 1] = evaluate_model(bayes_model, testset)
+    
     #print(f'Accuracy for iteration {i}: {accuracy[i]:.2f}')
-    print(root)
+    #print(root)
 
-avg_model_accuracy = np.average(accuracy)
+avg_model_accuracy = np.average(accuracy, axis=0)
+
 end = time.time() #11.11.24: avg time 4.9 seconds
 
-print(f'Average model accuracy for decision tree: {avg_model_accuracy:.2f}')
+print(f'Average model accuracy for decision tree: {avg_model_accuracy}')
 print(f'Total execution time: {end - start:.3f} seconds')
 
 
