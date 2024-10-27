@@ -5,8 +5,8 @@ import matplotlib as plt
 import time
 
 from preprocessing import *
-from decision_tree import *
-from naive_bayes import *
+from models.decision_tree import *
+from models.naive_bayes import *
 from evaluate import *
 
 pd.options.mode.chained_assignment = None # disable SettingWithCopyWarning
