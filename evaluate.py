@@ -1,4 +1,4 @@
-from decision_tree import *
+from models.decision_tree import *
 
 def evaluate_model(model, dataset) :
     prediction = model.classify_dataset(dataset)

@@ -25,19 +25,19 @@ for i in range(k) :
     trainset, testset = get_train_test_split(i, k, shuffled_data)
 
     ##--------------- decision tree ----------------------
-    root = build_decision_tree(trainset, verbose=False)
+    root = decision_tree(trainset, verbose=False)
     accuracy[i, 0] = evaluate_model(root, testset)
-    #print(root)
+    print(root)
 
     ##--------------- naive bayes ----------------------
     bayes_model = naive_bayes_model(shuffled_data)
     accuracy[i, 1] = evaluate_model(bayes_model, testset)
     
-    #print(f'Accuracy for iteration {i}: {accuracy[i]:.2f}')
+    print(f'Accuracy for iteration {i}: {accuracy[i]}')
 
 avg_model_accuracy = np.average(accuracy, axis=0)
 
-end = time.time() #11.11.24: avg time 4.9 seconds
+end = time.time()
 
 print(f'Average model accuracy: {avg_model_accuracy}')
 print(f'Total execution time: {end - start:.3f} seconds')
