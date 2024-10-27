@@ -28,11 +28,9 @@ class decision_tree:
         
         return self.right.classify_datapoint(datapoint)
     
-    # TODO: rethink if we actually want to add the classification to the original dataframe or instead return a separate object. Update: No, we do not...
-    # classify a set of datapoints
-    def classify_dataset(self, df) :
-        df.loc[:, 'classification'] = df.apply(self.classify_datapoint, axis=1, result_type='expand')
-        return df
+    def classify_dataset(self, df : pd.core.frame.DataFrame) -> pd.core.frame.DataFrame :
+        series = df.apply(self.classify_datapoint, axis=1)
+        return pd.DataFrame(data=series, columns=['prediction'])
     
     # TODO: fix show task, currently only breadth-first traversal
     def __show_tree(self) :

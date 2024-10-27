@@ -23,28 +23,23 @@ start = time.time() # TODO: function specific timer would be neat
 # k-fold cross-validation
 for i in range(k) : 
     trainset, testset = get_train_test_split(i, k, shuffled_data)
-    #----------------------------------------------------------
-    
-    ##--------------- decision tree model building ----------------------
 
-    # TODO: fix this
+    ##--------------- decision tree ----------------------
+    root = build_decision_tree(trainset, verbose=False)
+    accuracy[i, 0] = evaluate_model(root, testset)
+    #print(root)
 
-    #root = build_decision_tree(trainset, verbose=False)
-    #accuracy[i, 0] = evaluate_model(root, testset)
-    
+    ##--------------- naive bayes ----------------------
     bayes_model = naive_bayes_model(shuffled_data)
-    #print(testset.head())
-    #print(bayes_model.classify_dataset(testset))
     accuracy[i, 1] = evaluate_model(bayes_model, testset)
     
     #print(f'Accuracy for iteration {i}: {accuracy[i]:.2f}')
-    #print(root)
 
 avg_model_accuracy = np.average(accuracy, axis=0)
 
 end = time.time() #11.11.24: avg time 4.9 seconds
 
-print(f'Average model accuracy for decision tree: {avg_model_accuracy}')
+print(f'Average model accuracy: {avg_model_accuracy}')
 print(f'Total execution time: {end - start:.3f} seconds')
 
 

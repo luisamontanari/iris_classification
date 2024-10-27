@@ -18,6 +18,8 @@ print(bayes_model.classify_dataset(shuffled_data))
 
 
 vari = np.array([0.4, 0.1, 0.3, 0.07])
+print(type(vari), type(shuffled_data))
+
 means = np.array([6.59, 2.97, 5.55, 2.026])
 obs = np.array([6.7, 3.3, 5.7, 2.5])
 f1 = 1/(np.sqrt(2*np.pi*vari))
