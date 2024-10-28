@@ -1,10 +1,11 @@
 import pandas as pd
 import math
 import numpy as np
+from models.ml_model import *
 
 # TODO research classification and regression tree algorithm (CART)
 
-class decision_tree:
+class decision_tree(ml_model):
     def __init__(self, data, verbose=False):
         self.root = self._build_decision_tree(data, verbose)
         
@@ -12,7 +13,7 @@ class decision_tree:
         return self.root._show_tree()
     
     # classify a single datapoint
-    def classify_datapoint(self, datapoint):
+    def classify_datapoint(self, datapoint : pd.Series) -> str :
         return self.root._classify_datapoint(datapoint)
     
     def classify_dataset(self, df : pd.core.frame.DataFrame) -> pd.core.frame.DataFrame :
@@ -42,7 +43,7 @@ class decision_tree:
         return total_gini, l_variety_occ_arr > r_variety_occ_arr
 
     # calculate the threshold with minimal GI on a specific feature
-    def _calc_min_GI_for_feature(self, df, feature) : # TODO: vectorize
+    def _calc_min_GI_for_feature(self, df : pd.core.frame.DataFrame, feature : str) -> tuple[list[int], int, bool]: 
         unique_feat_count = df['variety'].unique().shape[0]
         min_gini = [1] * unique_feat_count
         prev_avg = math.nan
@@ -67,7 +68,7 @@ class decision_tree:
                 threshold = avg
                 direction = dir.copy()
 
-        return(min_gini, threshold, direction)
+        return min_gini, threshold, direction
 
     # calculate feature and threshold with minimal GI
     def _calc_purest_segmentation(self, df, verbose=False) :

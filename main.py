@@ -27,7 +27,7 @@ for i in range(k) :
     ##--------------- decision tree ----------------------
     root = decision_tree(trainset, verbose=False)
     accuracy[i, 0] = evaluate_model(root, testset)
-    print(root)
+    print(f'Decision tree representation in breadth-first traversal: {root}')
 
     ##--------------- naive bayes ----------------------
     bayes_model = naive_bayes_model(shuffled_data)

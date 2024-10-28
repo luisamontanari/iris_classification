@@ -1,8 +1,8 @@
 import pandas as pd
-import math
 import numpy as np
+from models.ml_model import *
 
-class naive_bayes_model:
+class naive_bayes_model(ml_model):
     # Naive Bayes assumption: all features are independent
     # assumption is rarely true, but NB is still surprisingly accurate in classification tasks (but not regression!)
     def __init__(self, training_data : pd.core.frame.DataFrame) -> None :
@@ -14,7 +14,7 @@ class naive_bayes_model:
         self.priors = priors_vec.astype(float)
         self.class_mapping = class_mapping # map class indices to labels
     
-    def classify_datapoint(self, datapoint : pd.Series) -> tuple[int, str] :
+    def classify_datapoint(self, datapoint : pd.Series) -> str :
         dp = datapoint.drop(labels=['variety']).to_numpy().flatten().astype(float)
         
         # P(x(i) | y), likelihood of our observation of feature x(i) (columns) assuming class x is present (rows)
