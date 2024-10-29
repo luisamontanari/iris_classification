@@ -6,8 +6,8 @@ from models.ml_model import *
 # TODO research classification and regression tree algorithm (CART)
 
 class decision_tree(ml_model):
-    def __init__(self, data, verbose=False):
-        self.root = self._build_decision_tree(data, verbose)
+    def __init__(self, training_data, verbose=False):
+        self.root = self._build_decision_tree(training_data, verbose)
         
     def __str__(self) : 
         return self.root._show_tree()
