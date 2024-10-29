@@ -21,21 +21,23 @@ class decision_tree(ml_model):
     
     # calc GI on a specific segementation of the dataset (left_branch vs right_branch)
     def _calc_GI(self, df, left_branch, right_branch, unique_feat_count) :
-        l_variety_occ_arr = np.arange(unique_feat_count) # will contain occurence count of each variety in left_branch
+        # fill arrays with occurence count of each variety in left/right_branch
+        l_variety_occ_arr = np.arange(unique_feat_count)
         r_variety_occ_arr = np.arange(unique_feat_count)
 
-        for i, variety in enumerate(df['variety'].unique()):
+        #for i, variety in enumerate(df['variety'].unique()):
+        for i, variety in enumerate(left_branch['variety'].unique() + right_branch['variety'].unique()):
             l_variety_occ_arr[i] = left_branch[left_branch['variety'] == variety].shape[0]
             r_variety_occ_arr[i] = right_branch[right_branch['variety'] == variety].shape[0]
 
         l_variety_miss_arr = left_branch.shape[0] - l_variety_occ_arr
         r_variety_miss_arr = right_branch.shape[0] - r_variety_occ_arr
 
-        # step 5 calculate unweighted Gini Impurity
+        # calculate unweighted Gini Impurity
         gini_left = 1 - (l_variety_occ_arr/left_branch.shape[0])**2 - (l_variety_miss_arr/left_branch.shape[0])**2
         gini_right = 1 - (r_variety_occ_arr/right_branch.shape[0])**2 - (r_variety_miss_arr/right_branch.shape[0])**2
 
-        # weighted left and right gini impurities
+        # calc weighted left and right gini impurities
         w_gini_left = (left_branch.shape[0]/df.shape[0]) * gini_left
         w_gini_right = (right_branch.shape[0]/df.shape[0]) * gini_right
 
@@ -48,19 +50,20 @@ class decision_tree(ml_model):
         min_gini = [1] * unique_feat_count
         prev_avg = math.nan
         for i in range(df.shape[0]-1) :
-            # step 1: calculate average between pairs in the sorted feature column as potential thresholds
+            # calculate average between pairs in the sorted feature column as potential thresholds
             avg = (df[feature].iloc[i] + df[feature].iloc[i+1])/2
             if avg == prev_avg: 
                 continue
             prev_avg = avg
 
-            # step 2: separate df by threshold
+            # separate df by threshold
             left_branch = df[df[feature] < avg]
             right_branch = df[df[feature] >= avg]
 
             if left_branch.shape[0] == 0 or right_branch.shape[0] == 0: 
                 continue
             
+            # calc GI for separated data
             gini, dir = self._calc_GI(df, left_branch, right_branch, unique_feat_count)
 
             if min(gini) < min(min_gini) : 
@@ -71,7 +74,7 @@ class decision_tree(ml_model):
         return min_gini, threshold, direction
 
     # calculate feature and threshold with minimal GI
-    def _calc_purest_segmentation(self, df, verbose=False) :
+    def _calc_purest_segmentation(self, df : pd.core.frame.DataFrame, verbose : bool = False) :
         unique_feat_count = df['variety'].unique().shape[0]
         min_gini_total = [1] * unique_feat_count
         for feature in df.columns[:-1]:
@@ -88,13 +91,13 @@ class decision_tree(ml_model):
         return min_gini_total, purest_threshold, purest_feature, direction
 
     # if df contains only one variety, return that. Otherwise, return None
-    def _get_unique_variety_if_ex(self, df):
+    def _get_unique_variety_if_ex(self, df : pd.core.frame.DataFrame):
         df_unique = df['variety'].unique()
         if len(df_unique) == 1: 
             return df_unique['variety'].iloc[0]
         return None
 
-    def _build_decision_tree(self, trainset, g_i=[], variety=None, verbose=False) :
+    def _build_decision_tree(self, trainset : pd.core.frame.DataFrame, g_i : list[int] = [], variety : str = None, verbose : bool = False) :
 
         #special case: if only one feature exists, return leaf node immediately
         unique_variety = self._get_unique_variety_if_ex(trainset)
@@ -129,8 +132,7 @@ class decision_tree(ml_model):
 
 class tree_node: 
      # classify a single datapoint
-    def _classify_datapoint(self, datapoint):
-        # TODO: add exception if child node does not exist
+    def _classify_datapoint(self, datapoint : pd.Series) -> str :
         #traverse tree until we get to a leaf, then output classification label
         if isinstance(self, leaf) :
             return self.label
@@ -146,7 +148,7 @@ class tree_node:
         return pd.DataFrame(data=series, columns=['prediction'])
     
     # show tree in breadth-first-traversal
-    def _show_tree(self) :
+    def _show_tree(self) -> str :
         if isinstance(self, decision_node) :
             data = f'(TreeNode: {self.feature} {self.threshold:.3f})'
             if (self.left and self.right) :
