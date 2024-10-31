@@ -49,8 +49,8 @@ class decision_node(tree_node):
         self.feature = feature
 
 class decision_tree(ml_model):
-    def __init__(self, training_data, verbose=False):
-        self.root : tree_node = self._build_decision_tree(training_data, verbose=verbose)
+    def __init__(self, training_data, debug=False):
+        self.root : tree_node = self._build_decision_tree(training_data, debug=debug)
         
     def __str__(self) : 
         return self.root._show_tree()
@@ -121,20 +121,20 @@ class decision_tree(ml_model):
         return min_gini, threshold, direction
 
     # calculate feature and threshold with minimal GI
-    def _calc_purest_segmentation(self, df : pd.DataFrame, verbose : bool = False) -> tuple[list[int], int, str, bool]:
+    def _calc_purest_segmentation(self, df : pd.DataFrame, debug : bool = False) -> tuple[list[int], int, str, bool]:
         unique_feat_count = df['variety'].unique().shape[0]
         min_gini_total = [1] * unique_feat_count
         for feature in df.columns[:-1]:
-            if (verbose) : print(f'\n{feature}:')
+            if (debug) : print(f'\n{feature}:')
             sorted_df = df.sort_values(by=[feature], ignore_index=True)
             g_i, threshold, dir = self._calc_min_GI_for_feature(sorted_df, feature)
-            if (verbose) : print(f'Gini coefficients: {g_i}, direction: {dir}')
+            if (debug) : print(f'Gini coefficients: {g_i}, direction: {dir}')
             if min(g_i) < min(min_gini_total) :
                 min_gini_total = g_i.copy()
                 purest_feature = feature
                 direction = dir.copy()
                 purest_threshold = threshold
-        if (verbose) : print('-----------------------------------')
+        if (debug) : print('-----------------------------------')
         return min_gini_total, purest_threshold, purest_feature, direction
 
     # if df contains only one variety, return that. Otherwise, return None
@@ -144,13 +144,13 @@ class decision_tree(ml_model):
         return None
 
     # build decision tree model
-    def _build_decision_tree(self, trainset : pd.DataFrame, recursion_depth : int = 0, variety : str = None, verbose : bool = False) -> tree_node :
+    def _build_decision_tree(self, trainset : pd.DataFrame, recursion_depth : int = 0, variety : str = None, debug : bool = False) -> tree_node :
         #special case: if only one feature exists, return leaf node immediately
         unique_variety = self._get_unique_variety_if_ex(trainset)
         if unique_variety : return leaf(unique_variety)
 
         # determine purest threshold and g_i value for each variety when separated by that threshold
-        g_i, threshold, feature, most_entries_under_threshold = self._calc_purest_segmentation(trainset, verbose=verbose)
+        g_i, threshold, feature, most_entries_under_threshold = self._calc_purest_segmentation(trainset, debug=debug)
 
         node = decision_node(threshold, feature) 
 
@@ -169,7 +169,7 @@ class decision_tree(ml_model):
                     node.right = leaf(variety)
         # if left/right node is not a leaf, recurse -> it will then automatically become a decision node
         if (not node.right):
-            node.right = self._build_decision_tree(trainset_right, recursion_depth+1, variety, verbose)
+            node.right = self._build_decision_tree(trainset_right, recursion_depth+1, variety, debug)
         if (not node.left) :
-            node.left = self._build_decision_tree(trainset_left, recursion_depth+1, variety, verbose)
+            node.left = self._build_decision_tree(trainset_left, recursion_depth+1, variety, debug)
         return node
