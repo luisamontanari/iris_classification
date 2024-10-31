@@ -5,7 +5,7 @@ from models.ml_model import *
 class naive_bayes_model(ml_model):
     # Naive Bayes assumption: all features are independent
     # assumption is rarely true, but NB is still surprisingly accurate in classification tasks (but not regression!)
-    def __init__(self, training_data : pd.core.frame.DataFrame) :
+    def __init__(self, training_data : pd.DataFrame) :
         variance_mat, means_mat, priors_vec, class_mapping = self._build_naive_bayes_model(training_data)
         
         # shape of all matrices: (#classes, #features), i.e. (3, 4)
@@ -27,7 +27,7 @@ class naive_bayes_model(ml_model):
         prediction = self.class_mapping.get(np.argmax(class_probabilities))
         return prediction
     
-    def _build_naive_bayes_model(self, df : pd.core.frame.DataFrame) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict] : 
+    def _build_naive_bayes_model(self, df : pd.DataFrame) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict] : 
         # model building: get priors, mean and variance matrix
         feature_count = df.shape[1]-1
         class_count = df['variety'].unique().shape[0]

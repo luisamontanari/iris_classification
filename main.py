@@ -4,17 +4,17 @@ import os
 import matplotlib as plt
 import time
 
-from preprocessing import *
+#from preprocessing import *
 from models.decision_tree import *
 from models.naive_bayes import *
 from models.kNN import *
-from evaluate import *
+from helper import *
 
 pd.options.mode.chained_assignment = None # disable SettingWithCopyWarning
 np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)}) # format np array prints to 2 decimal places
 
 iris_data = iris_data = pd.read_csv('./input/iris.csv')
-shuffled_data = iris_data.sample(frac=1) # shuffle data
+shuffled_data = iris_data.sample(frac=1).reset_index(drop=True) # shuffle data
 
 k=10 # param for k-fold-cross-validation, commonly 10
 model_mapping = {0: 'Decision Tree', 1: 'Naive Bayes', 2: 'k-nearest neighbor'}
@@ -24,12 +24,12 @@ start = time.time() # TODO: function specific timer would be neat
 #-----------------------------------------------------------
 # k-fold cross-validation
 for i in range(k) : 
-    trainset, testset = get_train_test_split(i, k, shuffled_data)
+    trainset, testset = get_train_test_split(shuffled_data, i, k)
 
     ##--------------- decision tree ----------------------
     root = decision_tree(trainset, verbose=False)
     accuracy[i, 0] = evaluate_model(root, testset)
-    #print(f'Decision tree representation in breadth-first traversal: {root}')
+    print(f'Decision tree representation in breadth-first traversal: {root}')
 
     ##--------------- naive bayes ----------------------
     bayes_model = naive_bayes_model(shuffled_data)
